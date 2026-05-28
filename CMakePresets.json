@@ -1,0 +1,40 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "desktop-sdl",
+            "displayName": "Desktop SDL2 (x86_64 development)",
+            "description": "Native build with SDL2 backend",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build-sdl",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CONFIG": "default"
+            }
+        },
+        {
+            "name": "a7-drm",
+            "displayName": "A7 DRM/KMS cross-compiled (STM32MP157)",
+            "description": "Cross-compile for Cortex-A7 armhf with DRM backend",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build-a7",
+            "toolchainFile": "${sourceDir}/cmake/stm32mp157-toolchain.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CONFIG": "vic3da-drm"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "desktop-sdl",
+            "configurePreset": "desktop-sdl",
+            "jobs": 4
+        },
+        {
+            "name": "a7-drm",
+            "configurePreset": "a7-drm",
+            "jobs": 4
+        }
+    ]
+}

@@ -19,9 +19,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include "lvgl/lvgl.h"
 #if LV_USE_LINUX_DRM
+
+/* Defined in main.c — controls run loop lifetime */
+extern volatile sig_atomic_t g_running;
 #include "../simulator_util.h"
 #include "../simulator_settings.h"
 #include "../backends.h"
@@ -95,6 +99,10 @@ static lv_display_t * init_drm(void)
 
     lv_linux_drm_set_file(disp, device, -1);
 
+    /* DSI-1 is 480×800 portrait; enable SW CCW rotation for landscape 800×480 UI.
+     * Change false→true if the screen appears upside-down. */
+    lv_linux_drm_enable_sw_rotation(disp, false);
+
     return disp;
 }
 
@@ -107,7 +115,7 @@ static void run_loop_drm(void)
     uint32_t idle_time;
 
     /* Handle LVGL tasks */
-    while(true) {
+    while(g_running) {
         /* Returns the time to the next timer execution */
         idle_time = lv_timer_handler();
         usleep(idle_time * 1000);

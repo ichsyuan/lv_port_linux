@@ -390,6 +390,10 @@ endif()
 file(GLOB LV_LINUX_SRC src/lib/*.c)
 set(LV_LINUX_INC src/lib)
 
+# VIC3DA app sources
+file(GLOB APP_SRC src/app/*.c)
+set(APP_INC ${CMAKE_CURRENT_SOURCE_DIR}/src/app)
+
 target_include_directories(lvgl PUBLIC ${PKG_CONFIG_INC})
 
 # Library type is determined by BUILD_SHARED_LIBS (shared if ON, static if OFF)
@@ -401,15 +405,21 @@ target_include_directories(lvgl_linux PUBLIC ${PKG_CONFIG_INC})
 set_target_properties(lvgl_linux PROPERTIES COMPILE_DEFINITIONS "${LVGL_COMPILER_DEFINES}")
 target_include_directories(lvgl_linux PUBLIC
     ${LV_LINUX_INC} ${CMAKE_CURRENT_SOURCE_DIR}
-    ${PROJECT_SOURCE_DIR}/src/lib ${LVGL_CONF_INC_DIR})
+    ${PROJECT_SOURCE_DIR}/src/lib ${LVGL_CONF_INC_DIR}
+    ${APP_INC})
 
 # Link LVGL with external dependencies - Modern CMake/CMP0079 allows this
 target_link_libraries(lvgl PUBLIC ${PKG_CONFIG_LIB} m pthread rt dl)
 
-add_executable(lvglsim src/main.c)
+add_executable(lvglsim src/main.c ${APP_SRC})
+target_include_directories(lvglsim PRIVATE
+    ${APP_INC}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${LV_LINUX_INC}
+    ${LVGL_CONF_INC_DIR})
 
-# Repeat lvgl_linux to resolve circular dependency with lvgl
-target_link_libraries(lvglsim lvgl_linux lvgl lvgl_linux)
+# Repeat lvgl_linux to resolve circular dependency with lvgl; add pthread explicitly
+target_link_libraries(lvglsim lvgl_linux lvgl lvgl_linux pthread)
 
 if(WERROR)
     target_compile_options(lvglsim PRIVATE -Werror)

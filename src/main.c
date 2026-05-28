@@ -22,13 +22,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include "lvgl/lvgl.h"
-#include "lvgl/demos/lv_demos.h"
 
 #include "src/lib/driver_backends.h"
 #include "src/lib/simulator_util.h"
 #include "src/lib/simulator_settings.h"
+
+#include "app/shared_state.h"
+#include "app/rpmsg_client.h"
+#include "app/ui_main.h"
+
+volatile sig_atomic_t g_running = 1;
+static pthread_t      g_rpmsg_thread;
+
+static void sigterm_handler(int sig)
+{
+    (void)sig;
+    g_running = 0;
+    rpmsg_client_stop();
+}
 
 /* Internal functions */
 static void configure_simulator(int argc, char ** argv);
@@ -160,6 +174,9 @@ static void configure_simulator(int argc, char ** argv)
 int main(int argc, char ** argv)
 {
 
+    signal(SIGTERM, sigterm_handler);
+    signal(SIGINT,  sigterm_handler);
+
     configure_simulator(argc, argv);
 
     /* Initialize LVGL. */
@@ -183,12 +200,22 @@ int main(int argc, char ** argv)
     }
 #endif
 
-    /*Create a Demo*/
-    lv_demo_widgets();
-    lv_demo_widgets_start_slideshow();
+    shared_state_init();
+    ui_main_init();
+
+    if(rpmsg_client_open("/dev/ttyRPMSG0") == 0) {
+        rpmsg_client_send_cmd('s');
+        pthread_create(&g_rpmsg_thread, NULL, rpmsg_reader_thread_fn, NULL);
+    } else {
+        fprintf(stderr, "[vic3da] /dev/ttyRPMSG0 not available — running in display-only mode\n");
+    }
 
     /* Enter the run loop of the selected backend */
     driver_backends_run_loop();
+
+    rpmsg_client_stop();
+    pthread_join(g_rpmsg_thread, NULL);
+    shared_state_destroy();
 
     return 0;
 }

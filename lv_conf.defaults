@@ -25,7 +25,7 @@ LV_USE_DRAW_SDL 0
 # A display driver is responsible for how the draw buffer is rendered to the screen
 
 # Simple framebuffer device
-LV_USE_LINUX_FBDEV      1
+LV_USE_LINUX_FBDEV      0
 LV_LINUX_FBDEV_RENDER_MODE   LV_DISPLAY_RENDER_MODE_DIRECT
 LV_LINUX_FBDEV_BUFFER_COUNT  2
 
@@ -34,7 +34,7 @@ LV_USE_LINUX_DRM        0
 LV_USE_LINUX_DRM_GBM_BUFFERS 0
 
 # SDL2
-LV_USE_SDL              0
+LV_USE_SDL              1
 LV_SDL_RENDER_MODE      LV_DISPLAY_RENDER_MODE_DIRECT 
 LV_SDL_BUF_COUNT        1
 LV_SDL_ACCELERATED      1
@@ -51,7 +51,7 @@ LV_WAYLAND_DIRECT_EXIT  1
 LV_USE_GLFW 0
 
 # Input support (enable when using FBDEV or DRM)
-LV_USE_EVDEV    1
+LV_USE_EVDEV    0
 LV_USE_LIBINPUT 0
 
 # Auxiliary drivers
