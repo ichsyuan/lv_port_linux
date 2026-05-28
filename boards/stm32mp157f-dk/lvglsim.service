@@ -1,0 +1,19 @@
+[Unit]
+Description=VIC3DA LVGL UI
+After=start-m4.service systemd-udev-settle.service
+Wants=start-m4.service
+Conflicts=weston-graphical-session.service
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/pkill -9 psplash-drm
+ExecStart=/home/root/lvglsim
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=5
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
