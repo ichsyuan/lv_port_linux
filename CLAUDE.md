@@ -86,6 +86,10 @@ cmake -B build -DASAN=ON && cmake --build build -j$(nproc)
 
 **觸控校正：** `ui_main_init()` 為直向 480×800 觸控面板套用 90° CCW 軟體旋轉與軸交換，以對應橫向 800×480 顯示。此段以 `#if LV_USE_EVDEV` 條件編譯保護。
 
+**DRM SW 旋轉：** `src/lib/display_backends/drm.c` 的 `init_drm()` 呼叫 `lv_linux_drm_enable_sw_rotation(disp, false)` 將直向 480×800 物理畫面轉為橫向 800×480 邏輯顯示。此函式原本存在於舊版 LVGL，被移除後已手動移植回 `lvgl/src/drivers/display/drm/lv_linux_drm.c`（同時更新 `include/lvgl/drivers/display/lv_linux_drm.h` 宣告）。**若 LVGL submodule 再次被 bot 更新，此函式會被覆蓋，需重新移植。**
+
+**Chart Auto Scale：** `ui_accel.c` 的 Filtered / Raw 圖表與 `ui_temp.c` 的 Temperature 圖表均實作 auto scale——每次 update 後透過 `lv_chart_get_series_y_array()` 掃描所有點，以 `min/max ± 10% margin`（最小 50 單位）動態更新 Y 軸範圍。
+
 **正常關機流程：** `SIGTERM`／`SIGINT` 將 `g_running` 設為 0（宣告於 `app_lifecycle.h`，定義於 `main.c`）並呼叫 `rpmsg_client_stop()`。DRM run loop 每個 tick 檢查 `g_running`。
 
 ## 部署到 STM32MP157F-DK2（192.168.11.13）
@@ -94,8 +98,10 @@ cmake -B build -DASAN=ON && cmake --build build -j$(nproc)
 
 ```bash
 cmake --build --preset a7-drm
+# 必須先 stop 再 scp，否則 binary 正在執行會報 "Text file busy"
+ssh root@192.168.11.13 "systemctl stop lvglsim"
 scp build-a7/bin/lvglsim root@192.168.11.13:~/
-ssh root@192.168.11.13 "systemctl restart lvglsim"
+ssh root@192.168.11.13 "systemctl start lvglsim"
 ```
 
 ### 服務管理
@@ -111,6 +117,40 @@ ssh root@192.168.11.13 "systemctl restart lvglsim"
 **已停用的衝突服務：**
 - `ttyrpmsg_reader_mqtt.service` — 原本也讀 `/dev/ttyRPMSG0`，與 `lvglsim` 衝突
 - `weston-graphical-session.service` — Weston 與 `lvglsim` 爭奪 DRM master
+
+## 部署到 Ka-Ro TXMP-1570（192.168.11.15）
+
+### U-Boot 前置設定（一次性）
+
+TXMP-1570 的顯示 pipeline 由 U-Boot 在開機時根據 `videomode` 變數動態填入 Device Tree。
+**必須先在 U-Boot 設定，否則 Linux 的 stm32-display 驅動找不到 CRTC。**
+
+```
+TXMP U-Boot > setenv videomode ET0350
+TXMP U-Boot > saveenv
+TXMP U-Boot > boot
+```
+
+### 每次更新 binary
+
+```bash
+cmake --build --preset txmp-drm
+ssh root@192.168.11.15 "systemctl stop lvglsim"
+scp build-txmp/bin/lvglsim root@192.168.11.15:~/
+ssh root@192.168.11.15 "systemctl start lvglsim"
+```
+
+### 服務管理
+
+```bash
+ssh root@192.168.11.15 "systemctl status lvglsim"
+ssh root@192.168.11.15 "journalctl -u lvglsim -f"
+ssh root@192.168.11.15 "systemctl restart lvglsim"
+```
+
+**Backend：fbdev（`/dev/fb0`）**
+TXMP 的 `stm32-display` DRM 驅動在此 BSP 不支援 userspace atomic modesetting，
+改用 fbdev backend 直接寫入 `/dev/fb0`（`vic3da-txmp.defaults` 中 `LV_USE_LINUX_FBDEV=1`）。
 
 ### 新增 UI 分頁
 

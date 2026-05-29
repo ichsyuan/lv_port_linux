@@ -1,4 +1,6 @@
-# VIC3DA DRM/KMS config for Ka-Ro TXMP-1570 (STM32MP157C, 320x240)
+# VIC3DA fbdev config for Ka-Ro TXMP-1570 (STM32MP157C, 320x240)
+# Uses fbdev (/dev/fb0 via stmdrmfb) — stm32-display DRM driver does not
+# support atomic modesetting from userspace on this BSP.
 
 LV_COLOR_DEPTH 16
 
@@ -9,15 +11,15 @@ LV_USE_NANOVG           0
 LV_USE_DRAW_G2D         0
 LV_USE_DRAW_SDL         0
 
-# DRM backend — no EGL, no GBM
-LV_USE_LINUX_DRM              1
-LV_USE_LINUX_DRM_GBM_BUFFERS  0
-LV_LINUX_DRM_USE_EGL          0
+# fbdev backend — writes directly to /dev/fb0
+LV_USE_LINUX_FBDEV              1
+LV_LINUX_FBDEV_RENDER_MODE      LV_DISPLAY_RENDER_MODE_DIRECT
+LV_LINUX_FBDEV_BUFFER_COUNT     2
 
-# No SDL or Wayland on target
+# No DRM, SDL or Wayland
+LV_USE_LINUX_DRM        0
 LV_USE_SDL              0
 LV_USE_WAYLAND          0
-LV_USE_LINUX_FBDEV      0
 
 # EVDEV for touchscreen input
 LV_USE_EVDEV            1
