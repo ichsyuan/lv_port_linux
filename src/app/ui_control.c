@@ -1,4 +1,5 @@
 #include "ui_control.h"
+#include "ui_theme.h"
 #include "rpmsg_client.h"
 
 static void btn_cb(lv_event_t *e)
@@ -10,7 +11,7 @@ static void btn_cb(lv_event_t *e)
 void ui_control_create(lv_obj_t *parent)
 {
     lv_obj_t *bar = lv_obj_create(parent);
-    lv_obj_set_size(bar, LV_PCT(100), 56);
+    lv_obj_set_size(bar, LV_PCT(100), UI_CONTROLBAR_HEIGHT);
     lv_obj_set_style_pad_all(bar, 4, 0);
     lv_obj_set_style_pad_column(bar, 4, 0);
     lv_obj_set_style_radius(bar, 0, 0);

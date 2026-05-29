@@ -1,11 +1,12 @@
 #include "ui_statusbar.h"
+#include "ui_theme.h"
 
 static lv_obj_t *s_lbl_cpu;
 
 void ui_statusbar_create(lv_obj_t *parent)
 {
     lv_obj_t *bar = lv_obj_create(parent);
-    lv_obj_set_size(bar, LV_PCT(100), 28);
+    lv_obj_set_size(bar, LV_PCT(100), UI_STATUSBAR_HEIGHT);
     lv_obj_set_style_radius(bar, 0, 0);
     lv_obj_set_style_border_width(bar, 0, 0);
     lv_obj_set_style_pad_all(bar, 4, 0);
@@ -17,14 +18,14 @@ void ui_statusbar_create(lv_obj_t *parent)
 
     s_lbl_cpu = lv_label_create(bar);
     lv_label_set_text(s_lbl_cpu, "CPU: --.-%");
-    lv_obj_set_style_text_font(s_lbl_cpu, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(s_lbl_cpu, UI_FONT_SMALL, 0);
     lv_obj_set_style_text_color(s_lbl_cpu, lv_palette_main(LV_PALETTE_CYAN), 0);
 
     lv_obj_t *title = lv_label_create(bar);
     lv_label_set_text(title, "VIC3DA UI");
     lv_obj_set_flex_grow(title, 1);
     lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_RIGHT, 0);
-    lv_obj_set_style_text_font(title, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(title, UI_FONT_SMALL, 0);
     lv_obj_set_style_text_color(title, lv_palette_lighten(LV_PALETTE_GREY, 2), 0);
 }
 

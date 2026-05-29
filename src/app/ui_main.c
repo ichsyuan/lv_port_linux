@@ -1,4 +1,5 @@
 #include "ui_main.h"
+#include "ui_theme.h"
 #include "shared_state.h"
 #include "cpu_monitor.h"
 #include "ui_statusbar.h"
@@ -73,7 +74,7 @@ void ui_main_init(void)
     /* TabView — flex-grow:1, fills remaining space */
     lv_obj_t *tv = lv_tabview_create(root);
     lv_tabview_set_tab_bar_position(tv, LV_DIR_TOP);
-    lv_tabview_set_tab_bar_size(tv, 50);
+    lv_tabview_set_tab_bar_size(tv, UI_TABBAR_HEIGHT);
     lv_obj_set_width(tv, LV_PCT(100));
     lv_obj_set_height(tv, 0);
     lv_obj_set_flex_grow(tv, 1);

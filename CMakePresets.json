@@ -14,14 +14,30 @@
         },
         {
             "name": "a7-drm",
-            "displayName": "A7 DRM/KMS cross-compiled (STM32MP157)",
+            "displayName": "A7 DRM/KMS cross-compiled (STM32MP157F-DK2)",
             "description": "Cross-compile for Cortex-A7 armhf with DRM backend",
             "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/build-a7",
             "toolchainFile": "${sourceDir}/cmake/stm32mp157-toolchain.cmake",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CONFIG": "vic3da-drm"
+                "CONFIG": "vic3da-drm",
+                "UI_HOR_RES": "800",
+                "UI_VER_RES": "400"
+            }
+        },
+        {
+            "name": "txmp-drm",
+            "displayName": "TXMP DRM/KMS cross-compiled (Ka-Ro TXMP-1570)",
+            "description": "Cross-compile for Ka-Ro TXMP-1570 (STM32MP157C) with DRM backend",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build-txmp",
+            "toolchainFile": "${sourceDir}/cmake/stm32mp157-toolchain.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CONFIG": "vic3da-txmp",
+                "UI_HOR_RES": "320",
+                "UI_VER_RES": "240"
             }
         }
     ],
@@ -34,6 +50,11 @@
         {
             "name": "a7-drm",
             "configurePreset": "a7-drm",
+            "jobs": 4
+        },
+        {
+            "name": "txmp-drm",
+            "configurePreset": "txmp-drm",
             "jobs": 4
         }
     ]

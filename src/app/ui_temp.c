@@ -1,4 +1,5 @@
 #include "ui_temp.h"
+#include "ui_theme.h"
 
 static lv_obj_t          *s_lbl_temp_big;
 static lv_obj_t          *s_lbl_raw;
@@ -10,9 +11,9 @@ void ui_temp_create(lv_obj_t *parent)
     lv_obj_set_flex_flow(parent, LV_FLEX_FLOW_ROW);
     lv_obj_clear_flag(parent, LV_OBJ_FLAG_SCROLLABLE);
 
-    /* ---- Left: big temperature reading (220px) ---- */
+    /* ---- Left: big temperature reading ---- */
     lv_obj_t *left = lv_obj_create(parent);
-    lv_obj_set_size(left, 220, LV_PCT(100));
+    lv_obj_set_size(left, UI_LEFT_PANEL_NARROW, LV_PCT(100));
     lv_obj_set_flex_flow(left, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_all(left, 8, 0);
     lv_obj_set_style_pad_row(left, 10, 0);
@@ -20,13 +21,13 @@ void ui_temp_create(lv_obj_t *parent)
 
     s_lbl_temp_big = lv_label_create(left);
     lv_label_set_text(s_lbl_temp_big, "---.- °C");
-    lv_obj_set_style_text_font(s_lbl_temp_big, &lv_font_montserrat_48, 0);
+    lv_obj_set_style_text_font(s_lbl_temp_big, UI_FONT_BIG, 0);
     lv_obj_set_style_text_align(s_lbl_temp_big, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_width(s_lbl_temp_big, LV_PCT(100));
 
     s_lbl_raw = lv_label_create(left);
     lv_label_set_text(s_lbl_raw, "Raw ADC: ---");
-    lv_obj_set_style_text_font(s_lbl_raw, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(s_lbl_raw, UI_FONT_SMALL, 0);
     lv_obj_set_style_text_align(s_lbl_raw, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_width(s_lbl_raw, LV_PCT(100));
 
@@ -40,7 +41,7 @@ void ui_temp_create(lv_obj_t *parent)
 
     lv_obj_t *chart_lbl = lv_label_create(right);
     lv_label_set_text(chart_lbl, "Temperature History (60s)");
-    lv_obj_set_style_text_font(chart_lbl, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(chart_lbl, UI_FONT_SMALL, 0);
     lv_obj_set_style_text_color(chart_lbl, lv_palette_lighten(LV_PALETTE_GREY, 1), 0);
 
     s_chart = lv_chart_create(right);
@@ -56,9 +57,26 @@ void ui_temp_create(lv_obj_t *parent)
                                      LV_CHART_AXIS_PRIMARY_Y);
 }
 
+static void auto_scale_chart(lv_obj_t *chart, lv_chart_series_t *ser, int32_t min_margin)
+{
+    int32_t mn = INT32_MAX, mx = INT32_MIN;
+    uint32_t count = lv_chart_get_point_count(chart);
+    const int32_t *arr = lv_chart_get_series_y_array(chart, ser);
+    for (uint32_t i = 0; i < count; i++) {
+        if (arr[i] == LV_CHART_POINT_NONE) continue;
+        if (arr[i] < mn) mn = arr[i];
+        if (arr[i] > mx) mx = arr[i];
+    }
+    if (mn == INT32_MAX) return;
+    int32_t margin = (mx - mn) / 10;
+    if (margin < min_margin) margin = min_margin;
+    lv_chart_set_axis_range(chart, LV_CHART_AXIS_PRIMARY_Y, mn - margin, mx + margin);
+}
+
 void ui_temp_update(const TemperaturePacket_t *pkt)
 {
     lv_label_set_text_fmt(s_lbl_temp_big, "%.2f °C", (double)pkt->temp_celsius);
     lv_label_set_text_fmt(s_lbl_raw,      "Raw ADC: %u", (unsigned)pkt->temp_raw);
     lv_chart_set_next_value(s_chart, s_ser_temp, (int32_t)(pkt->temp_celsius * 100.0f));
+    auto_scale_chart(s_chart, s_ser_temp, 50); /* 50 = 0.5°C minimum margin */
 }

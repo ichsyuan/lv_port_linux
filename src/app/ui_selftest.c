@@ -1,4 +1,5 @@
 #include "ui_selftest.h"
+#include "ui_theme.h"
 
 static lv_obj_t *s_lbl_acc_status;
 static lv_obj_t *s_lbl_acc_delta;
@@ -34,36 +35,36 @@ void ui_selftest_create(lv_obj_t *parent)
 
     lv_obj_t *t_acc = lv_label_create(left);
     lv_label_set_text(t_acc, "--- ADXL355 ---");
-    lv_obj_set_style_text_font(t_acc, &lv_font_montserrat_16, 0);
+    lv_obj_set_style_text_font(t_acc, UI_FONT_NORMAL, 0);
     lv_obj_set_style_text_color(t_acc, lv_palette_main(LV_PALETTE_GREY), 0);
 
     s_lbl_acc_status = lv_label_create(left);
     lv_label_set_text(s_lbl_acc_status, "ACC: ---");
-    lv_obj_set_style_text_font(s_lbl_acc_status, &lv_font_montserrat_24, 0);
+    lv_obj_set_style_text_font(s_lbl_acc_status, UI_FONT_MEDIUM, 0);
 
     s_lbl_acc_delta = lv_label_create(left);
     lv_label_set_text(s_lbl_acc_delta, "Delta:\n(---, ---, ---) mg");
-    lv_obj_set_style_text_font(s_lbl_acc_delta, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(s_lbl_acc_delta, UI_FONT_SMALL, 0);
 
     s_lbl_offset = lv_label_create(left);
     lv_label_set_text(s_lbl_offset, "Offset:\n(---.---, ---.---, ---) mg");
-    lv_obj_set_style_text_font(s_lbl_offset, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(s_lbl_offset, UI_FONT_SMALL, 0);
 
     /* ---- Right panel: GNSS ---- */
     lv_obj_t *right = make_panel(parent);
 
     lv_obj_t *t_gnss = lv_label_create(right);
     lv_label_set_text(t_gnss, "--- GNSS ---");
-    lv_obj_set_style_text_font(t_gnss, &lv_font_montserrat_16, 0);
+    lv_obj_set_style_text_font(t_gnss, UI_FONT_NORMAL, 0);
     lv_obj_set_style_text_color(t_gnss, lv_palette_main(LV_PALETTE_GREY), 0);
 
     s_lbl_gnss_status = lv_label_create(right);
     lv_label_set_text(s_lbl_gnss_status, "GNSS IMU: ---");
-    lv_obj_set_style_text_font(s_lbl_gnss_status, &lv_font_montserrat_24, 0);
+    lv_obj_set_style_text_font(s_lbl_gnss_status, UI_FONT_MEDIUM, 0);
 
     s_lbl_gnss_errcode = lv_label_create(right);
     lv_label_set_text(s_lbl_gnss_errcode, "Error: ---");
-    lv_obj_set_style_text_font(s_lbl_gnss_errcode, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_font(s_lbl_gnss_errcode, UI_FONT_SMALL, 0);
 }
 
 void ui_selftest_update(const SelfTestPacket_t *pkt)

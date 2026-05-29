@@ -1,4 +1,5 @@
 #include "ui_gnss.h"
+#include "ui_theme.h"
 
 static lv_obj_t *s_led_fix;
 static lv_obj_t *s_lbl_lat;
@@ -15,7 +16,7 @@ void ui_gnss_create(lv_obj_t *parent)
     lv_obj_clear_flag(parent, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t *left = lv_obj_create(parent);
-    lv_obj_set_size(left, 280, LV_PCT(100));
+    lv_obj_set_size(left, UI_LEFT_PANEL_WIDE, LV_PCT(100));
     lv_obj_set_flex_flow(left, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_all(left, 8, 0);
     lv_obj_set_style_pad_row(left, 6, 0);
@@ -31,11 +32,11 @@ void ui_gnss_create(lv_obj_t *parent)
 
     lv_obj_t *lbl_fix = lv_label_create(fix_row);
     lv_label_set_text(lbl_fix, "Fix:");
-    lv_obj_set_style_text_font(lbl_fix, &lv_font_montserrat_16, 0);
+    lv_obj_set_style_text_font(lbl_fix, UI_FONT_NORMAL, 0);
     s_led_fix = lv_led_create(fix_row);
     lv_led_set_color(s_led_fix, lv_palette_main(LV_PALETTE_RED));
     lv_led_set_brightness(s_led_fix, 200);
-    lv_obj_set_size(s_led_fix, 16, 16);
+    lv_obj_set_size(s_led_fix, UI_LED_SIZE, UI_LED_SIZE);
 
     /* Data labels */
     s_lbl_lat   = lv_label_create(left);
@@ -55,7 +56,7 @@ void ui_gnss_create(lv_obj_t *parent)
     lv_obj_t *lbls[] = { s_lbl_lat, s_lbl_lon, s_lbl_speed,
                          s_lbl_sats, s_lbl_time, s_lbl_date };
     for(int i = 0; i < 6; i++) {
-        lv_obj_set_style_text_font(lbls[i], &lv_font_montserrat_16, 0);
+        lv_obj_set_style_text_font(lbls[i], UI_FONT_NORMAL, 0);
     }
 }
 

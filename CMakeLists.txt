@@ -32,6 +32,8 @@ if(ASAN)
 endif()
 
 set(CONFIG "default" CACHE STRING "Config name to use. Leave empty for default `lv_conf.defaults`")
+set(UI_HOR_RES "800" CACHE STRING "Compile-time UI horizontal resolution for ui_theme.h sizing")
+set(UI_VER_RES "400" CACHE STRING "Compile-time UI vertical resolution for ui_theme.h sizing")
 
 set(LV_CONF_DEFAULTS_PATH "${CMAKE_SOURCE_DIR}/lv_conf.defaults")
 
@@ -420,6 +422,7 @@ target_include_directories(lvglsim PRIVATE
 
 # Repeat lvgl_linux to resolve circular dependency with lvgl; add pthread explicitly
 target_link_libraries(lvglsim lvgl_linux lvgl lvgl_linux pthread)
+target_compile_definitions(lvglsim PRIVATE UI_HOR_RES=${UI_HOR_RES} UI_VER_RES=${UI_VER_RES})
 
 if(WERROR)
     target_compile_options(lvglsim PRIVATE -Werror)
