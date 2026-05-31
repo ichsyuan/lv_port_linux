@@ -3,10 +3,11 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <errno.h>
+#include <stdatomic.h>
 #include "rpmsg_client.h"
 #include "packet_parser.h"
 
-static volatile int g_fd = -1;
+static atomic_int g_fd = -1;
 
 int rpmsg_client_open(const char *dev_path)
 {
@@ -27,13 +28,13 @@ int rpmsg_client_open(const char *dev_path)
         tcsetattr(fd, TCSANOW, &tty);
     }
 
-    g_fd = fd;
+    atomic_store(&g_fd, fd);
     return 0;
 }
 
 int rpmsg_client_send_cmd(uint8_t cmd)
 {
-    int fd = g_fd;
+    int fd = atomic_load(&g_fd);
     if(fd < 0) return -1;
     ssize_t n = write(fd, &cmd, 1);
     return (n == 1) ? 0 : -1;
@@ -46,7 +47,7 @@ void *rpmsg_reader_thread_fn(void *arg)
 
     uint8_t byte;
     while(1) {
-        ssize_t n = read(g_fd, &byte, 1);
+        ssize_t n = read(atomic_load(&g_fd), &byte, 1);
         if(n <= 0) break;
         packet_parser_feed(byte);
     }
@@ -55,10 +56,10 @@ void *rpmsg_reader_thread_fn(void *arg)
 
 void rpmsg_client_stop(void)
 {
-    int fd = g_fd;
+    int fd = atomic_load(&g_fd);
     if(fd < 0) return;
     uint8_t e = 'e';
     write(fd, &e, 1);   /* async-signal-safe */
     close(fd);
-    g_fd = -1;
+    atomic_store(&g_fd, -1);
 }

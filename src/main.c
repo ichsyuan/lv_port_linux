@@ -36,6 +36,7 @@
 
 volatile sig_atomic_t g_running = 1;
 static pthread_t      g_rpmsg_thread;
+static bool           g_rpmsg_started = false;
 
 static void sigterm_handler(int sig)
 {
@@ -205,7 +206,11 @@ int main(int argc, char ** argv)
 
     if(rpmsg_client_open("/dev/ttyRPMSG0") == 0) {
         rpmsg_client_send_cmd('s');
-        pthread_create(&g_rpmsg_thread, NULL, rpmsg_reader_thread_fn, NULL);
+        if(pthread_create(&g_rpmsg_thread, NULL, rpmsg_reader_thread_fn, NULL) == 0) {
+            g_rpmsg_started = true;
+        } else {
+            fprintf(stderr, "[vic3da] pthread_create failed — RPMsg reader not started\n");
+        }
     } else {
         fprintf(stderr, "[vic3da] /dev/ttyRPMSG0 not available — running in display-only mode\n");
     }
@@ -214,7 +219,9 @@ int main(int argc, char ** argv)
     driver_backends_run_loop();
 
     rpmsg_client_stop();
-    pthread_join(g_rpmsg_thread, NULL);
+    if(g_rpmsg_started) {
+        pthread_join(g_rpmsg_thread, NULL);
+    }
     shared_state_destroy();
 
     return 0;

@@ -11,9 +11,11 @@
 #include "lvgl/lvgl.h"
 
 #define LABEL_UPDATE_EVERY  31   /* 16ms × 31 ≈ 496ms ≈ 2Hz  */
+#define CHART_UPDATE_EVERY   UI_CHART_UPDATE_EVERY
 #define CPU_UPDATE_EVERY    62   /* 16ms × 62 ≈ 992ms ≈ 1Hz  */
 
 static uint32_t s_label_tick = 0;
+static uint32_t s_chart_tick = 0;
 static uint32_t s_cpu_tick   = 0;
 
 static void sensor_poll_timer_cb(lv_timer_t *timer)
@@ -22,6 +24,9 @@ static void sensor_poll_timer_cb(lv_timer_t *timer)
 
     bool do_label = (++s_label_tick >= LABEL_UPDATE_EVERY);
     if(do_label) s_label_tick = 0;
+
+    bool do_chart = (++s_chart_tick >= CHART_UPDATE_EVERY);
+    if(do_chart) s_chart_tick = 0;
 
     bool do_cpu = (++s_cpu_tick >= CPU_UPDATE_EVERY);
     if(do_cpu) {
@@ -33,12 +38,13 @@ static void sensor_poll_timer_cb(lv_timer_t *timer)
     if(!shared_state_read(&snap)) return;
 
     if(snap.accel_fresh) {
-        ui_accel_update_chart(&snap.accel);
+        if(do_chart) ui_accel_update_chart(&snap.accel);
         if(do_label) ui_accel_update_labels(&snap.accel);
         if(do_label) ui_gnss_update(&snap.accel);
     }
     if(snap.temp_fresh)     ui_temp_update(&snap.temp);
     if(snap.selftest_fresh) ui_selftest_update(&snap.selftest);
+    /* snap.drsint_fresh: DRSINTPacket_t received from M4 but no UI tab allocated */
 }
 
 void ui_main_init(void)
