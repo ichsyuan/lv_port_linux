@@ -24,12 +24,14 @@ LV_USE_LINUX_FBDEV      0
 LV_USE_EVDEV            1
 LV_USE_LIBINPUT         0
 
-# Fonts used by the UI
-LV_FONT_MONTSERRAT_14   1
-LV_FONT_MONTSERRAT_16   1
+# Fonts used by the UI (sized for 233 PPI to match TXMP 114 PPI visual scale ×2.04)
+LV_FONT_MONTSERRAT_14   0
+LV_FONT_MONTSERRAT_20   1
 LV_FONT_MONTSERRAT_24   1
+LV_FONT_MONTSERRAT_32   1
 LV_FONT_MONTSERRAT_48   1
 LV_FONT_MONTSERRAT_28_COMPRESSED 0
+LV_FONT_DEFAULT         &lv_font_montserrat_20
 
 # No demos or examples (we have our own UI)
 LV_BUILD_EXAMPLES       0
