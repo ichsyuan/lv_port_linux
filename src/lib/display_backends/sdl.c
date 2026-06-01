@@ -18,9 +18,14 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include "lvgl/lvgl.h"
 #if LV_USE_SDL
+
+/* Defined in main.c — controls run loop lifetime */
+extern volatile sig_atomic_t g_running;
+
 #include "../simulator_util.h"
 #include "../simulator_settings.h"
 #include "../backends.h"
@@ -125,7 +130,7 @@ static void run_loop_sdl(void)
     uint32_t idle_time;
 
     /* Handle LVGL tasks */
-    while(true) {
+    while(g_running) {
         /* Returns the time to the next timer execution */
         idle_time = lv_timer_handler();
         usleep(idle_time * 1000);

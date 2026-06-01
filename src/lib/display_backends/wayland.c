@@ -18,9 +18,14 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "lvgl/lvgl.h"
 #if LV_USE_WAYLAND
+
+/* Defined in main.c — controls run loop lifetime */
+extern volatile sig_atomic_t g_running;
+
 #include "../simulator_util.h"
 #include "../simulator_settings.h"
 #include "../backends.h"
@@ -126,7 +131,7 @@ static void run_loop_wayland(void)
     uint32_t idle_time;
 
     /* Handle LVGL tasks */
-    while(true) {
+    while(g_running) {
 
         idle_time = lv_wayland_timer_handler();
 
