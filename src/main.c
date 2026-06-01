@@ -34,15 +34,22 @@
 #include "app/rpmsg_client.h"
 #include "app/ui_main.h"
 
-volatile sig_atomic_t g_running = 1;
-static pthread_t      g_rpmsg_thread;
-static bool           g_rpmsg_started = false;
+volatile sig_atomic_t        g_running       = 1;
+static pthread_t             g_rpmsg_thread;
+static volatile sig_atomic_t g_rpmsg_started = 0;
+
+/* No-op handler: registering it makes SIGUSR1 interrupt blocking syscalls */
+static void sigusr1_noop(int sig) { (void)sig; }
 
 static void sigterm_handler(int sig)
 {
     (void)sig;
     g_running = 0;
     rpmsg_client_stop();
+    /* close() alone does not unblock read() on ttyRPMSG0 (Linux TTY driver
+     * behaviour). Send SIGUSR1 to the reader thread so its read() returns
+     * EINTR and the thread exits cleanly before pthread_join(). */
+    if(g_rpmsg_started) pthread_kill(g_rpmsg_thread, SIGUSR1);
 }
 
 /* Internal functions */
@@ -177,6 +184,7 @@ int main(int argc, char ** argv)
 
     signal(SIGTERM, sigterm_handler);
     signal(SIGINT,  sigterm_handler);
+    signal(SIGUSR1, sigusr1_noop);
 
     configure_simulator(argc, argv);
 
@@ -207,7 +215,7 @@ int main(int argc, char ** argv)
     if(rpmsg_client_open("/dev/ttyRPMSG0") == 0) {
         rpmsg_client_send_cmd('s');
         if(pthread_create(&g_rpmsg_thread, NULL, rpmsg_reader_thread_fn, NULL) == 0) {
-            g_rpmsg_started = true;
+            g_rpmsg_started = 1;
         } else {
             fprintf(stderr, "[vic3da] pthread_create failed — RPMsg reader not started\n");
         }
