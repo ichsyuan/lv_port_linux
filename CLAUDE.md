@@ -152,6 +152,16 @@ ssh root@192.168.11.15 "systemctl restart lvglsim"
 TXMP 的 `stm32-display` DRM 驅動在此 BSP 不支援 userspace atomic modesetting，
 改用 fbdev backend 直接寫入 `/dev/fb0`（`vic3da-txmp.defaults` 中 `LV_USE_LINUX_FBDEV=1`）。
 
+**已停用的衝突服務：**
+- `weston.service` — Weston compositor 控制 DRM master，覆蓋 fbdev 寫入內容；症狀為 UI 短暫出現後立即閃退
+- `weston.socket` — Weston 的 socket activation，需一併停用
+
+```bash
+# 一次性設定（板子上執行）
+systemctl stop weston.socket weston.service
+systemctl disable weston.socket weston.service
+```
+
 ### 新增 UI 分頁
 
 1. 仿照 `ui_accel.c` 的模式建立 `src/app/ui_foo.c` + `src/app/ui_foo.h`。

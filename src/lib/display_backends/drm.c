@@ -99,8 +99,8 @@ static lv_display_t * init_drm(void)
 
     lv_linux_drm_set_file(disp, device, -1);
 
-    /* DSI-1 is 480×800 portrait; enable SW CCW rotation for landscape 800×480 UI.
-     * Change false→true if the screen appears upside-down. */
+    /* DSI-1 is 480×800 portrait; SW 90° CCW rotation for landscape 800×480 UI.
+     * Pass true if the screen appears upside-down. */
     lv_linux_drm_enable_sw_rotation(disp, false);
 
     return disp;
